@@ -1,0 +1,27 @@
+# Generated data — fully regenerable from data_pipeline/ scripts, don't commit
+data/
+
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+venv/
+.venv/
+env/
+
+# OS cruft
+.DS_Store
+Thumbs.db
+
+# Secrets / local config
+.env
+*.key
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Large raw downloads (PaySim CSV, IEEE-CIS CSVs, RBI xlsx exports)
+*.csv.zip
+PS_*.csv
+train_transaction.csv
+train_identity.csv

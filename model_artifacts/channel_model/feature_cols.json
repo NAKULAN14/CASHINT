@@ -1,0 +1,1 @@
+["as_of_hour", "as_of_day_of_week", "n_hops_observed", "time_since_last_hop_hours", "elapsed_hours_since_first_tx", "hop_velocity", "terminal_readiness", "n_split_events", "n_unique_banks_seen", "dormant_account_ratio", "avg_account_age_days", "min_account_age_days", "last_hop_amount", "amount_trend", "stolen_amount", "urban", "victim_lat", "victim_lon", "is_final_snapshot"]

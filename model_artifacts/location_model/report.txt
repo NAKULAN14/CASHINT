@@ -1,0 +1,12 @@
+Model metrics: {'n_groups': 1450, 'top1_accuracy': 0.09793103448275862, 'mrr': 0.2737392673723676}
+Baseline (nearest-to-victim): {'n_groups': 1450, 'top1_accuracy': 0.4889655172413793, 'mrr': 0.5245553616045769}
+
+              feature         gain
+       dist_victim_km 13537.391191
+        stolen_amount  5206.478993
+     dist_terminal_km  1752.883024
+   terminal_readiness  1241.186163
+      n_hops_observed   554.237801
+                urban   536.496099
+    is_final_snapshot    30.592999
+same_bank_as_terminal     0.000000

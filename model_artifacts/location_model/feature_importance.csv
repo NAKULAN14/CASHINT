@@ -1,0 +1,9 @@
+feature,gain
+dist_victim_km,13537.391191482544
+stolen_amount,5206.4789934158325
+dist_terminal_km,1752.8830242156982
+terminal_readiness,1241.1861629486084
+n_hops_observed,554.2378005981445
+urban,536.4960985183716
+is_final_snapshot,30.59299945831299
+same_bank_as_terminal,0.0
