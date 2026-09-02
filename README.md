@@ -48,8 +48,8 @@ SIH/
 │   ├── labels.jsonl
 │   ├── features_train.csv
 │   └── location_candidates.csv
-├── paysim_track/                       # <-- Friend 1 & Friend 2's work goes here
-│   ├── fix_paysim_target.py            # corrected future_cashout_24h target logic
+├── paysim_track/                       
+│   ├── fix_paysim_target.py            
 │   ├── clean.py                        # PaySim feature engineering pipeline
 │   ├── ieee_cis_discovery/
 │   │   ├── TRANSFERABLE_INSIGHTS.md
