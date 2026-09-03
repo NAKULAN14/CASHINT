@@ -98,20 +98,30 @@ def main(candidates_path, out_dir):
         "objective": "lambdarank",
         "metric": "ndcg",
         "eval_at": [1, 3],
-        "learning_rate": 0.05,
-        "num_leaves": 31,
-        "min_data_in_leaf": 10,
+        "learning_rate": 0.03,
+        "num_leaves": 15,
+        "min_data_in_leaf": 30,
+        "lambda_l2": 0.5,
         "feature_fraction": 0.8,
         "bagging_fraction": 0.8,
         "bagging_freq": 5,
+        # force the model to respect "farther = never more likely" as a hard
+        # rule, instead of hoping it discovers this from a sparse (1-in-~20)
+        # relevance signal -- -1 = prediction must be monotonically
+        # DEcreasing as the feature increases. Order must match FEATURE_COLS.
+        "monotone_constraints": [-1, -1, 0, 0, 0, 0, 0, 0],
         "verbose": -1,
     }
 
     model = lgb.train(
-        params, train_set, num_boost_round=300,
+        params, train_set, num_boost_round=500,
         valid_sets=[val_set],
-        callbacks=[lgb.early_stopping(20), lgb.log_evaluation(25)],
+        callbacks=[lgb.early_stopping(40), lgb.log_evaluation(25)],
     )
+
+    train_scores = model.predict(train_df[FEATURE_COLS], num_iteration=model.best_iteration)
+    train_metrics = evaluate_ranking(train_df, train_scores)
+    print(f"\nTRAIN metrics (compare to val below -- a big gap means overfitting): {train_metrics}")
 
     val_scores = model.predict(val_df[FEATURE_COLS], num_iteration=model.best_iteration)
     metrics = evaluate_ranking(val_df, val_scores)
