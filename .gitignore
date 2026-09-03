@@ -18,3 +18,9 @@ Thumbs.db
 .ipynb_checkpoints/
 
 # Large raw downloads (PaySim CSV, IEEE-CIS CSVs, RBI xlsx exports)
+*.csv.zip
+PS_*.csv
+PAYSIM.csv
+data/raw/PAYSIM.csv
+train_transaction.csv
+train_identity.csv
