@@ -56,7 +56,7 @@ SIH/
 │       ├── feature_cols.json
 │       ├── feature_importance.csv
 │       └── report.txt
-├── data/                               # regenerable — gitignored 
+├── data/                               # committed — all processed files are included
 │   ├── raw/                            # ATM_DATA.xlsx, lat.csv, PAYSIM.csv (source downloads)
 │   ├── atm_locations.csv
 │   ├── calibration.json
@@ -73,15 +73,42 @@ SIH/
 
 ---
 
-## Run order — main pipeline
+## Quick start
+
+All processed data files and trained model artifacts are committed to the repo.
+No data generation or model training is needed — just install dependencies and run
+the demo.
 
 ```bash
-# 1. Geocode your RBI ATM export
+# 1. Install dependencies
+pip install -r requirements.txt
+
+# 2. Run the demo
+python demo_app.py \
+    --cases data/cases.jsonl \
+    --channel_model_dir model_artifacts/channel_model \
+    --time_model_dir model_artifacts/time_model \
+    --atm_csv data/atm_locations.csv \
+    --interactive
+```
+
+That's it. The demo streams a single case evidence hop-by-hop and prints the evolving
+Channel + Time + Location + Confidence picture after each new piece of evidence.
+
+---
+
+## Re-generating data / retraining (optional)
+
+Only needed if you want to regenerate the synthetic dataset or retrain the models
+from scratch. Run in exact order:
+
+```bash
+# 1. Geocode your RBI ATM export (skip if using synthetic ATMs)
 python data_pipeline/prepare_atm_dataset.py \
     --atm_export data/raw/ATM_DATA.xlsx --district_geo data/raw/lat.csv \
     --out data/atm_locations.csv
 
-# 2. Calibrate against real PaySim statistics
+# 2. Calibrate against real PaySim statistics (optional, improves realism)
 python data_pipeline/calibrate_from_paysim.py \
     --paysim_csv data/raw/PAYSIM.csv --out data/calibration.json
 
@@ -117,6 +144,9 @@ python data_pipeline/build_location_candidates.py \
 python models/train_location_model.py \
     --candidates data/location_candidates.csv --out_dir model_artifacts/location_model
 ```
+
+If you regenerate `cases.jsonl`, re-run every step from `build_incremental_snapshots.py`
+onward.
 
 ---
 

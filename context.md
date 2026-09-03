@@ -3,81 +3,28 @@
 
 ---
 
-> [!CAUTION]
-> ## The entire `data/` directory is gitignored — you will NOT have it after cloning.
+> [!NOTE]
+> ## All data is committed — no generation step needed
 >
-> The `.gitignore` excludes **everything under `data/`**. None of the derived data
-> files exist in the repo and must be generated before the backend can start.
-> The raw source files (`data/raw/ATM_DATA.xlsx`, `data/raw/lat.csv`, `data/raw/PAYSIM.csv`)
-> are also not in the repo.
->
-> The **model artifacts** (`model_artifacts/`) ARE committed — no retraining needed.
-
-> [!IMPORTANT]
-> ## Generating the synthetic dataset (no raw source files required)
->
-> The pipeline has built-in synthetic fallbacks — **you do not need the real RBI or
-> PaySim files** to generate a working dataset. Run these commands from the repo root
-> in order:
+> The `data/` directory (including `atm_locations.csv`, `cases.jsonl`,
+> `snapshots.jsonl`, etc.) **and** all trained `model_artifacts/` are committed
+> to the repository. After cloning, the only thing you need to do is:
 >
 > ```bash
-> # 0. Create the data directory (gitignored, won't exist after clone)
-> mkdir data
->
-> # 1. Generate a synthetic ATM location file (500 ATMs spread across India).
-> #    This replicates the internal fallback grid used by the mule chain generator,
-> #    but saves it to a file so the rest of the pipeline can reference it.
-> python -c "
-> import numpy as np, csv, os
-> os.makedirs('data', exist_ok=True)
-> rng = np.random.default_rng(0)
-> lats = rng.uniform(8.0, 28.0, 500)
-> lons = rng.uniform(72.0, 88.0, 500)
-> banks = ['SBI','HDFC','ICICI','Axis','PNB','Kotak','BOB','Union']
-> with open('data/atm_locations.csv', 'w', newline='') as f:
->     w = csv.DictWriter(f, fieldnames=['id','lat','lon','bank'])
->     w.writeheader()
->     for i,(lat,lon) in enumerate(zip(lats,lons)):
->         w.writerow({'id':f'ATM_{i}','lat':round(float(lat),6),'lon':round(float(lon),6),'bank':banks[i%len(banks)]})
-> print('Written 500 synthetic ATMs to data/atm_locations.csv')
-> "
->
-> # 2. Generate 2000 synthetic cybercrime cases.
-> #    --calibration is omitted intentionally — the generator uses sensible built-in
-> #    defaults (lognormal amounts, uniform hour-of-day) without it.
-> python data_pipeline/mule_chain_generator.py \
->     --n_cases 2000 \
->     --atm_csv data/atm_locations.csv \
->     --out data/cases.jsonl
->
-> # 3. Slice each case into time-ordered evidence snapshots.
-> #    Writes snapshots.jsonl (no ground truth) and labels.jsonl (ground truth only).
-> python data_pipeline/build_incremental_snapshots.py \
+> pip install -r requirements.txt
+> python demo_app.py \
 >     --cases data/cases.jsonl \
->     --snapshots_out data/snapshots.jsonl \
->     --labels_out data/labels.jsonl
->
-> # 4. Flatten snapshots into a training feature table (needed only if retraining).
-> python data_pipeline/build_feature_table.py \
->     --snapshots data/snapshots.jsonl \
->     --labels data/labels.jsonl \
->     --out data/features_train.csv
->
-> # 5. Build ATM ranking candidates (needed only if retraining the location model).
-> python data_pipeline/build_location_candidates.py \
->     --snapshots data/snapshots.jsonl \
->     --labels data/labels.jsonl \
+>     --channel_model_dir model_artifacts/channel_model \
+>     --time_model_dir model_artifacts/time_model \
 >     --atm_csv data/atm_locations.csv \
->     --out data/location_candidates.csv
+>     --interactive
 > ```
 >
-> **After steps 1–3, the backend can start.** Steps 4–5 are only needed if you
-> want to retrain the models (the pre-trained artifacts in `model_artifacts/` already work).
+> That's it. Skip to **Section 4** to understand what the demo is doing.
 >
-> The three files the backend requires at startup:
-> - `data/atm_locations.csv` — the ATM database (for map + location prediction)
-> - `data/cases.jsonl` — all cases (for the `/cases` endpoint)
-> - `data/snapshots.jsonl` — all evidence snapshots (for the `/snapshots` endpoints)
+> Regenerating data or retraining models is only needed if you want to
+> change the synthetic case parameters. See **Section 9** for the full
+> pipeline run order.
 
 ---
 
@@ -607,13 +554,35 @@ Layout sketch:
 
 ---
 
-## 7. Backend startup commands
+## 7. Getting started
+
+### Install dependencies
 
 ```bash
-# Install core ML dependencies
 pip install -r requirements.txt
+```
 
-# Verify all three model families load correctly
+### Run the CLI demo
+
+All data and model artifacts are committed to the repo. Just run:
+
+```bash
+# Recommended: baseline location mode (nearest-to-victim heuristic)
+python demo_app.py \
+    --cases data/cases.jsonl \
+    --channel_model_dir model_artifacts/channel_model \
+    --time_model_dir model_artifacts/time_model \
+    --atm_csv data/atm_locations.csv \
+    --interactive
+```
+
+Optional flags:
+- `--case_id <uuid>` — run on a specific case instead of the first one
+- `--location_mode model --location_model_dir model_artifacts/location_model` — use the trained location ranker instead of the heuristic (currently underperforms heuristic — debug only)
+
+### Verify models load correctly
+
+```bash
 python -c "
 import lightgbm as lgb, json
 m = lgb.Booster(model_file='model_artifacts/channel_model/channel_model.txt')
