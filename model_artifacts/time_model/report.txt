@@ -1,0 +1,25 @@
+Median MAE: 1.957 hours
+Naive baseline MAE: 2.529 hours
+10-90 coverage: 76.3% (target ~80%)
+Avg window width: 5.32 hours
+
+                     feature        gain
+                hop_velocity 9978.346409
+elapsed_hours_since_first_tx 1781.377407
+             n_hops_observed 1164.470046
+        min_account_age_days  940.072324
+          terminal_readiness  930.191560
+               stolen_amount  672.752221
+        avg_account_age_days  672.129829
+                  victim_lat  602.664981
+                  victim_lon  570.715259
+   time_since_last_hop_hours  541.290797
+                  as_of_hour  470.252559
+                amount_trend  443.529197
+             last_hop_amount  209.587600
+         n_unique_banks_seen  202.544262
+           as_of_day_of_week  190.790091
+       dormant_account_ratio  135.325230
+              n_split_events  113.873081
+                       urban   55.463570
+           is_final_snapshot   42.087880
