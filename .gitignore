@@ -1,6 +1,3 @@
-# Generated data — fully regenerable from data_pipeline/ scripts, don't commit
-data/
-
 # Python
 __pycache__/
 *.pyc
