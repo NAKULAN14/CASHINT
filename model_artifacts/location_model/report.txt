@@ -1,6 +1,41 @@
-Model metrics: {'n_groups': 1450, 'top1_accuracy': 0.47586206896551725, 'mrr': 0.5178985734974846}
-Baseline (nearest-to-victim): {'n_groups': 1450, 'top1_accuracy': 0.4889655172413793, 'mrr': 0.5245553616045769}
+Location Ranking Model — Verified Final Report
+================================================
+Run date: 2026-09-04
+Pipeline: build_location_candidates.py → train_location_model.py (real data, full run)
 
+--- Data stats ---
+ATM locations:     54,914
+Snapshot groups:    7,331  (all 7,331 have a true label present)
+Candidate rows:   148,687  (avg 20.3 candidates/group)
+Train groups:       5,881  (1,600 cases)
+Val groups:         1,450  (400 cases)
+
+--- Model config (final — do NOT regress) ---
+objective:           lambdarank
+num_leaves:          15
+min_data_in_leaf:    30
+lambda_l2:           0.5
+feature_fraction:    0.8
+bagging_fraction:    0.8 / freq 5
+learning_rate:       0.03
+monotone_constraints: [-1, -1, 0, 0, 0, 0, 0, 0]
+  (dist_victim_km and dist_terminal_km forced monotonically non-increasing)
+Early stopping:      40 rounds
+Best iteration:      1  (model converges in 1 round — see structural notes below)
+
+--- Final metrics ---
+Train top-1 accuracy:    49.65%  |  MRR: 0.536
+Val top-1 accuracy:      47.59%  |  MRR: 0.518
+Nearest-to-victim baseline (val): 48.90%  |  MRR: 0.525
+
+Train/val gap: 2.1 pp — no meaningful overfitting (confirmed).
+Val vs baseline gap: 1.3 pp. With n=1,450 val groups, the standard error on
+top-1 accuracy is ~1.3 pp — this gap is within 1 standard error (not
+statistically significant). The task author described this run as "essentially
+matched." The model is NOT switched to default in demo_app.py because the
+literal criterion (val >= baseline) is not met.
+
+--- Feature importance (gain) ---
               feature     gain
    terminal_readiness 15.04889
       n_hops_observed  6.88419
@@ -10,3 +45,70 @@ Baseline (nearest-to-victim): {'n_groups': 1450, 'top1_accuracy': 0.488965517241
                 urban  2.45517
 same_bank_as_terminal  0.00000
         stolen_amount  0.00000
+
+--- Structural findings (step-4 investigation) ---
+
+1. dist_victim_km distribution within groups:
+   - 50.2% of groups: true ATM IS the nearest candidate (rank 1 by distance).
+     The baseline captures these correctly, so it's hard to beat.
+   - 75th-pct true ATM rank: 18/21. Top 25% of hard cases have true ATM
+     ranked near-last by distance. The monotonic constraint correctly prevents
+     these from being scored high — but can't overcome the distance penalty
+     using case-level features alone (which are constant within a group).
+   - True ATM median distance from victim: 333 km (mean 574 km).
+     Nearest candidate median: 64 km. The task is genuinely hard for a
+     distance-only ranking signal.
+
+2. same_bank_as_terminal = 0 for ALL rows — root cause confirmed:
+   - ATM CSV uses full official names: "STATE BANK OF INDIA" (94%) / "INDIAN BANK" (6%)
+   - Snapshots use abbreviations: SBI, BOB, HDFC, ICICI, Axis, PNB, Kotak, Union
+   - These never match → feature is always 0.
+
+3. Bank name fix attempted and REVERTED (2026-09-04):
+   - Added ATM_BANK_NORM mapping (STATE BANK OF INDIA → SBI) in both
+     build_location_candidates.py and demo_app.py.
+   - Result: same_bank_as_terminal gained non-zero importance (3.36), but
+     stolen_amount exploded to gain=100 (was 0), and val accuracy DROPPED
+     from 47.59% to 42.07%.
+   - Root cause: with same_bank_as_terminal now splitting SBI-terminal groups,
+     the model used stolen_amount (a group-level constant, useless for within-
+     group ranking) as a secondary splitter, chasing spurious case-level patterns.
+     Both train and val dropped — the bank signal was misleading, not helpful.
+   - Fix reverted. known-good state (val=47.59%) fully restored.
+   - Even if the mapping worked cleanly: 94% of ATMs are SBI → near-zero
+     discrimination power within SBI-terminal groups. The data incompatibility
+     (real 2-bank ATM CSV vs synthetic 8-bank case data) is not fixable without
+     richer ATM data.
+
+4. Why early stopping fires at round 1:
+   - Case-level features (terminal_readiness, n_hops, stolen_amount, urban,
+     is_final_snapshot) are CONSTANT within each ranking group → cannot help
+     rank one candidate over another.
+   - same_bank_as_terminal = 0 always → zero signal.
+   - Only candidate-specific signal is dist_victim_km and dist_terminal_km, both
+     monotonically constrained. Round 1 encodes this monotone distance relationship
+     optimally; additional rounds can't find valid improving splits under the
+     constraints. Model converges immediately.
+
+--- Demo verification (model mode) ---
+Ran: python demo_app.py --location_mode model ... (two cases tested: 3-hop and 7-hop)
+Result: runs without errors; location mode correctly uses the ~20-ATM shortlist
+(nearest-15 + random-5), matching the training distribution.
+
+Top-3 ATMs appear stable across snapshots within each case — this is EXPECTED
+BEHAVIOR, not the "frozen top-3" bug. The distinction:
+  Original bug: scored all 54K ATMs → near-identical degenerate scores → arbitrary frozen top-3
+  Current behavior: 20-ATM shortlist → genuine distance ranking → same top-3 because
+    victim location does not change within a case (same 15 nearest ATMs in pool every time)
+The original frozen-top-3 fix (lines 106-111 in demo_app.py) is confirmed still in place.
+
+demo_app.py default: remains --location_mode baseline (val 47.59% < baseline 48.90%).
+Use --location_mode model --location_model_dir model_artifacts/location_model to use the
+trained ranker manually.
+
+--- What would actually help (if this is revisited) ---
+- Add true candidate-specific ATM features: ATM network, urban/rural type at ATM
+  location, ATM hours, or local crime pattern features.
+- Use richer bank data (real multi-bank ATM CSV) so same_bank_as_terminal fires
+  with actual signal.
+- Or accept the current performance as the structural ceiling given available data.

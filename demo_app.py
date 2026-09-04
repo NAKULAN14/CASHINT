@@ -153,9 +153,12 @@ def compute_confidence(channel_ranked, time_window, location_ranked, n_hops_obse
       median -- a window of +/-10% of the median is confident; a window
       several times wider than the median is not.
     - location_conf: how much the top-ranked location "wins" over the
-      second-ranked one (works whether ranked by model score or by raw
-      distance -- both come out of predict_location as an ordered list,
-      so we use rank position + a distance-based proxy gap either way).
+      second-ranked one.
+      * Model mode: uses the normalised score gap between rank-1 and rank-2
+        (score gap / score range across the shortlist), so confidence reflects
+        the ranker's actual certainty in its ordering, not just raw geography.
+      * Baseline mode: falls back to the relative distance gap between rank-1
+        and rank-2 distances from the victim.
     """
     top_channel_prob = channel_ranked[0][1]
     channel_conf = np.clip((top_channel_prob - 0.20) / 0.60, 0, 1)  # 0.20=baseline, 0.80=very confident
@@ -166,10 +169,26 @@ def compute_confidence(channel_ranked, time_window, location_ranked, n_hops_obse
     time_conf = np.clip(1 - (relative_width / 6.0), 0, 1)  # width > 6x median -> ~0 confidence
 
     if len(location_ranked) >= 2:
-        d1 = location_ranked[0]["dist_victim_km"]
-        d2 = location_ranked[1]["dist_victim_km"]
-        gap = abs(d2 - d1) / max(d1, 1.0)
-        location_conf = np.clip(gap, 0, 1)
+        if "score" in location_ranked[0]:
+            # Model mode: prefer score gap (normalised by shortlist range) as it
+            # reflects the ranker's certainty. Fall back to distance gap when all
+            # scores are identical (e.g. 1-tree model puts all shortlist candidates
+            # into the same leaf) — distance is then the only meaningful signal.
+            scores = [c["score"] for c in location_ranked]
+            score_range = max(scores) - min(scores)
+            if score_range > 1e-9:
+                norm_gap = (scores[0] - scores[1]) / score_range
+                location_conf = float(np.clip(norm_gap, 0, 1))
+            else:
+                # Scores are degenerate — fall back to distance gap
+                d1 = location_ranked[0]["dist_victim_km"]
+                d2 = location_ranked[1]["dist_victim_km"]
+                location_conf = float(np.clip(abs(d2 - d1) / max(d1, 1.0), 0, 1))
+        else:
+            # Baseline mode: relative distance gap — closer rank-1 vs rank-2 → higher confidence
+            d1 = location_ranked[0]["dist_victim_km"]
+            d2 = location_ranked[1]["dist_victim_km"]
+            location_conf = float(np.clip(abs(d2 - d1) / max(d1, 1.0), 0, 1))
     else:
         location_conf = 0.5
 
