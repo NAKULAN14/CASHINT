@@ -104,10 +104,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, isBacke
                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
                 }`}
               >
-                <MapPin className="h-3.5 w-3.5" />
-                <span>ATM Explorer</span>
-              </button>
-            </div>
+                
 
             {/* System Group */}
             <div className="flex items-center space-x-1 bg-slate-900/60 p-1 rounded-lg border border-slate-800">
