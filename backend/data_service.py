@@ -59,7 +59,26 @@ class DataService:
                     }
                     self.cases_by_id[case_id] = sanitized_case
                     self.cases_order.append(case_id)
-            print(f"Loaded {len(self.cases_by_id)} cases and generated snapshots into memory.")
+
+            # Re-order self.cases_order to place specified top 6 cases at the very beginning
+            target_prefixes = [
+                "82444dcb",
+                "c8602764",
+                "802ef8e3",
+                "05cbecf7",
+                "4b7d8f60",
+                "c4045d48"
+            ]
+            top_cases = []
+            for prefix in target_prefixes:
+                for cid in self.cases_order:
+                    if cid.lower().startswith(prefix.lower()):
+                        top_cases.append(cid)
+                        break
+            remaining_cases = [cid for cid in self.cases_order if cid not in top_cases]
+            self.cases_order = top_cases + remaining_cases
+
+            print(f"Loaded {len(self.cases_by_id)} cases and generated snapshots into memory (Top 6 priority cases placed first).")
 
         self.is_loaded = True
 

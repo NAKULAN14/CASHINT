@@ -73,7 +73,20 @@ export const Overview: React.FC<OverviewProps> = ({ onSelectCase }) => {
     { name: 'Other', count: 5, color: '#64748b' },
   ];
 
-  const priorityCases = cases.slice(0, 6);
+  const TARGET_PRIORITY_PREFIXES = [
+    '82444dcb',
+    'c8602764',
+    '802ef8e3',
+    '05cbecf7',
+    '4b7d8f60',
+    'c4045d48'
+  ];
+
+  const matchedPriorityCases = TARGET_PRIORITY_PREFIXES.map((prefix) =>
+    cases.find((c) => c.case_id.toLowerCase().startsWith(prefix.toLowerCase()))
+  ).filter((c): c is CaseSummary => c !== undefined);
+
+  const priorityCases = matchedPriorityCases.length > 0 ? matchedPriorityCases : cases.slice(0, 6);
 
   return (
     <div className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
