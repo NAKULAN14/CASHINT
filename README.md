@@ -1,162 +1,109 @@
-# Predictive Cash-Out Intelligence — Project README
+# Predictive Cash-Out Intelligence
 
-## What this is
-
-A machine-learning system for cybercrime investigation. Given a fraud case with a
-mule-chain of accounts, it predicts **where, when, and via which channel** the
-criminal will cash out — and updates those predictions in real time as each new
-hop of evidence arrives.
-
-Three models work together to produce the investigator view:
-
-| Model | Output |
-|---|---|
-| **Channel model** | Ranked probabilities across ATM / Branch / Agent / UPI / Other |
-| **Time model** | A prediction interval (p10 – p90 hours until cash-out) |
-| **Location model** | Ranked list of candidate ATMs, scored by likelihood |
-
-All three predictions are combined into a single **confidence level** (LOW / MEDIUM / HIGH)
-that gates how actionable the output is treated.
+> **Incremental Intelligence for Proactive Cybercrime Intervention**  
+> *A decision-support intelligence platform developed for Smart India Hackathon (SIH).*
 
 ---
 
-## Folder structure
+## 1. Executive Summary
+
+When a cyber financial fraud occurs, criminals route illicit funds through multi-layered mule account chains to obfuscate the money trail before physically withdrawing (**"cashing out"**) the money via ATMs, banking branches, local cash agents, or peer-to-peer UPI channels. Law enforcement investigators operate against a narrow time window to identify the withdrawal vector and freeze or interdict the funds.
+
+**Predictive Cash-Out Intelligence** transforms static post-facto fraud tracking into an active decision-support system. Rather than generating a one-time risk score, the system implements **incremental prediction**:
+> *"As new transaction hops and mule accounts are uncovered, Where, When, How, and Confidence continuously evolve."*
+
+---
+
+## 2. System Architecture
 
 ```
-SIH/
-├── data_pipeline/
-│   ├── mule_chain_generator.py        # generates synthetic cybercrime cases
-│   ├── prepare_atm_dataset.py         # geocodes RBI ATM export → lat/lon
-│   ├── calibrate_from_paysim.py       # fits real amount/timing stats from PaySim
-│   ├── build_incremental_snapshots.py # slices cases into time-ordered evidence snapshots
-│   ├── build_feature_table.py         # flattens snapshots into a flat training table
-│   └── build_location_candidates.py   # builds ranked ATM candidate sets per snapshot
-├── models/
-│   ├── train_channel_model.py         # trains the Channel prediction model
-│   ├── train_location_model.py        # trains the Location Ranking model
-│   ├── train_time_model.py            # trains the Time Window prediction model
-│   └── fix_paysim_target.py           # fixes the future_cashout_24h target bug in PaySim data
-├── model_artifacts/
-│   ├── channel_model/
-│   │   ├── channel_model.txt
-│   │   ├── class_names.json
-│   │   ├── feature_cols.json
-│   │   ├── feature_importance.csv
-│   │   ├── confusion_matrix.csv
-│   │   └── report.txt
-│   ├── location_model/
-│   │   ├── location_model.txt
-│   │   ├── feature_cols.json
-│   │   ├── feature_importance.csv
-│   │   └── report.txt
-│   └── time_model/
-│       ├── time_model_lower_p10.txt
-│       ├── time_model_median_p50.txt
-│       ├── time_model_upper_p90.txt
-│       ├── feature_cols.json
-│       ├── feature_importance.csv
-│       └── report.txt
-├── data/                               # committed — all processed files are included
-│   ├── raw/                            # ATM_DATA.xlsx, lat.csv, PAYSIM.csv (source downloads)
-│   ├── atm_locations.csv
-│   ├── calibration.json
-│   ├── cases.jsonl
-│   ├── snapshots.jsonl
-│   ├── labels.jsonl
-│   ├── features_train.csv
-│   └── location_candidates.csv
-├── demo_app.py                         # live CLI demo — streams evidence and updates all predictions
-├── .gitignore
-├── README.md
-└── requirements.txt
+                                  [ Investigator Interface ]
+                                   React 18 + TypeScript + Vite
+                                   Tailwind CSS + Leaflet Maps
+                                                ▲
+                                                │ REST API / JSON
+                                                ▼
+                                   [ Backend Nervous System ]
+                                  FastAPI (Python) + Pydantic
+                                  In-Memory Model & Data Singletons
+                                                ▲
+                                                │ Feature Flattening & Inference
+                                                ▼
+                     ┌──────────────────────────┼──────────────────────────┐
+                     ▼                          ▼                          ▼
+            [ Channel Model ]             [ Time Model ]            [ Location Baseline ]
+           LightGBM Multiclass         3x Quantile Regressors     Nearest-to-Victim Heuristic
+         (ATM / Agent / Branch /       (P10 / P50 / P90 Hours)     (Top Candidates with Mode
+               UPI / Other)             np.expm1() log-inverse        Toggle for Ranker)
 ```
 
 ---
 
-## Quick start
+## 3. Technology Stack
 
-All processed data files and trained model artifacts are committed to the repo.
-No data generation or model training is needed — just install dependencies and run
-the demo.
+- **Backend**: Python 3.10+, FastAPI, Uvicorn, Pydantic v2, Pandas, NumPy, LightGBM, Scikit-Learn.
+- **Frontend**: React 18, TypeScript, Vite, Tailwind CSS v4, Lucide Icons, Recharts, Leaflet & React-Leaflet.
+- **Data & Models**: Pre-trained LightGBM boosters, 2,000 synthetic PaySim-calibrated fraud cases, and 54,914 geocoded national ATM locations.
+
+---
+
+## 4. Quick Start & Local Execution
+
+### Option A: Unified One-Command Launcher (Recommended)
+
+From the project root:
 
 ```bash
 # 1. Install dependencies
-pip install -r requirements.txt
+pip install -r backend/requirements.txt
+cd frontend && npm install && cd ..
 
-# 2. Run the demo
+# 2. Start both Backend (Port 8000) and Frontend (Port 5173)
+python run_app.py
+```
+
+On Windows PowerShell:
+```powershell
+.\start.ps1
+```
+
+Access the application in your browser:
+- **Investigator Dashboard**: [http://localhost:5173](http://localhost:5173)
+- **FastAPI OpenAPI Documentation**: [http://localhost:8000/docs](http://localhost:8000/docs)
+- **API Health Endpoint**: [http://localhost:8000/health](http://localhost:8000/health)
+
+---
+
+### Option B: Running Services Separately
+
+#### 1. Backend Server
+```bash
+pip install -r backend/requirements.txt
+python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+#### 2. Frontend Application
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+---
+
+## 5. Verifying the CLI Reference Implementation
+
+The original CLI tool `demo_app.py` remains 100% functional and serves as the reference ground truth for prediction outputs:
+
+```bash
+# Baseline nearest-to-victim mode (Recommended production default)
 python demo_app.py \
     --cases data/cases.jsonl \
     --channel_model_dir model_artifacts/channel_model \
     --time_model_dir model_artifacts/time_model \
-    --atm_csv data/atm_locations.csv \
-    --interactive
-```
+    --atm_csv data/atm_locations.csv
 
-That's it. The demo streams a single case evidence hop-by-hop and prints the evolving
-Channel + Time + Location + Confidence picture after each new piece of evidence.
-
----
-
-## Re-generating data / retraining (optional)
-
-Only needed if you want to regenerate the synthetic dataset or retrain the models
-from scratch. Run in exact order:
-
-```bash
-# 1. Geocode your RBI ATM export (skip if using synthetic ATMs)
-python data_pipeline/prepare_atm_dataset.py \
-    --atm_export data/raw/ATM_DATA.xlsx --district_geo data/raw/lat.csv \
-    --out data/atm_locations.csv
-
-# 2. Calibrate against real PaySim statistics (optional, improves realism)
-python data_pipeline/calibrate_from_paysim.py \
-    --paysim_csv data/raw/PAYSIM.csv --out data/calibration.json
-
-# 3. Generate synthetic mule-chain cases
-python data_pipeline/mule_chain_generator.py \
-    --n_cases 2000 --atm_csv data/atm_locations.csv \
-    --calibration data/calibration.json --out data/cases.jsonl
-
-# 4. Slice into incremental evidence snapshots
-python data_pipeline/build_incremental_snapshots.py \
-    --cases data/cases.jsonl \
-    --snapshots_out data/snapshots.jsonl --labels_out data/labels.jsonl
-
-# 5. Flatten into a trainable feature table
-python data_pipeline/build_feature_table.py \
-    --snapshots data/snapshots.jsonl --labels data/labels.jsonl \
-    --out data/features_train.csv
-
-# 6. Train the Channel model
-python models/train_channel_model.py \
-    --features data/features_train.csv --out_dir model_artifacts/channel_model
-
-# 7. Train the Time Window model
-python models/train_time_model.py \
-    --features data/features_train.csv --out_dir model_artifacts/time_model
-
-# 8. Build ATM ranking candidates
-python data_pipeline/build_location_candidates.py \
-    --snapshots data/snapshots.jsonl --labels data/labels.jsonl \
-    --atm_csv data/atm_locations.csv --out data/location_candidates.csv
-
-# 9. Train the Location Ranking model
-python models/train_location_model.py \
-    --candidates data/location_candidates.csv --out_dir model_artifacts/location_model
-```
-
-If you regenerate `cases.jsonl`, re-run every step from `build_incremental_snapshots.py`
-onward.
-
----
-
-## Running the demo
-
-The demo streams a single case evidence hop-by-hop and prints the evolving
-Channel + Time + Location + Confidence picture after each new piece of evidence.
-
-```bash
-# Using the nearest-to-victim heuristic for location (recommended — see Status below)
+# Interactive stepping mode
 python demo_app.py \
     --cases data/cases.jsonl \
     --channel_model_dir model_artifacts/channel_model \
@@ -164,54 +111,154 @@ python demo_app.py \
     --atm_csv data/atm_locations.csv \
     --interactive
 
-# Using the trained location ranker instead
+# Model ranking mode (experimental debug)
 python demo_app.py \
     --cases data/cases.jsonl \
     --channel_model_dir model_artifacts/channel_model \
     --time_model_dir model_artifacts/time_model \
     --atm_csv data/atm_locations.csv \
     --location_mode model \
-    --location_model_dir model_artifacts/location_model \
-    --interactive
+    --location_model_dir model_artifacts/location_model
 ```
 
-Use `--case_id <id>` to run on a specific case instead of the first one in the file.
+To run automated backend tests:
+```bash
+python -m pytest tests/test_api.py -v
+```
 
 ---
 
-## Model status
+## 6. API Endpoints Reference
 
-### Channel model
-- **Algorithm**: LightGBM multiclass classifier (5 classes)
-- **Accuracy**: 44% (majority-class baseline was 34%)
-- **Top feature**: `stolen_amount`
-- **Note**: Branch, Other, and UPI are under-predicted in top-1 accuracy — evaluate
-  with top-2 accuracy or full ranked probabilities rather than top-1 alone.
-
-### Time model
-- **Algorithm**: 3 LightGBM quantile regressors (p10 / p50 / p90) on log1p(hours)
-- **Median MAE**: 1.96 hours (naive global-median baseline: 2.53 hours)
-- **p10–p90 coverage**: 76.3% (target ~80%)
-- **Average predicted window width**: 5.32 hours
-- **Top feature**: `hop_velocity`
-
-### Location model
-- **Algorithm**: LightGBM LambdaMART ranker
-- **Top-1 accuracy**: 47.6% | **MRR**: 0.518
-- **Nearest-to-victim baseline**: 48.9% Top-1 | MRR 0.525
-- **Status**: Currently **underperforms** the heuristic baseline. The demo defaults
-  to `--location_mode baseline` (nearest-to-victim) until the ranker is tuned.
-  See `model_artifacts/location_model/report.txt` for full metrics.
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/health` | System health check (`status`, `models_loaded`) |
+| `GET` | `/api/cases` | List case summaries (`case_id`, `stolen_amount`, `urban`, `complaint_timestamp`, `n_total_snapshots`). Strict: no `ground_truth`. |
+| `GET` | `/api/cases/{case_id}` | Full case metadata, accounts, transactions (no `ground_truth`). |
+| `GET` | `/api/cases/{case_id}/snapshots` | All chronological snapshots for a case. |
+| `GET` | `/api/cases/{case_id}/snapshots/{index}` | Specific snapshot by sequence index. |
+| `GET` | `/api/cases/{case_id}/analysis` | Pre-calculated sequence predictions across all snapshots for trend analytics. |
+| `POST` | `/api/predict` | Runs pipeline on a snapshot dict. Returns Where, When, How, Confidence, and Supporting Signals. |
+| `GET` | `/api/atms` | National ATM database list with optional `limit` and `bank` filters. |
+| `GET` | `/api/models/status` | Model metrics, feature importances, validation reports, and baseline disclosures. |
 
 ---
 
-## Notes
+## 7. Machine Learning Models & Production Safeguards
 
-- Every step from snapshot → feature → model depends on the **same generation run**.
-  If you regenerate `cases.jsonl` with different settings, re-run every step after
-  it too.
-- The ground truth is kept in a **separate** `labels.jsonl` file and never written
-  into `snapshots.jsonl`. This prevents the easy mistake of a model or demo
-  accidentally reading the answer while pretending to predict it.
-- `data/` (except `data/raw/`) is gitignored — all derived files are regenerable
-  from the pipeline above.
+### Core Models
+
+1. **Channel Model (`model_artifacts/channel_model/`)**:
+   - LightGBM Multiclass Classifier (5 classes: ATM, Agent, Branch, UPI, Other).
+   - Accuracy: **44.0%** (vs majority-class baseline of 34.0%).
+   - Key Feature: `stolen_amount`.
+
+2. **Time Window Model (`model_artifacts/time_model/`)**:
+   - 3x LightGBM Quantile Regressors (P10, P50, P90).
+   - Median MAE: **1.96 hours** (vs naive global median baseline of 2.53 hours).
+   - P10–P90 Coverage: **76.3%** (Target ~80%).
+   - Key Feature: `hop_velocity`.
+   - **Critical Transformation**: Output is trained on `log1p(hours_to_cashout)`. Inference strictly inverts this using `np.expm1()`.
+
+3. **Location Model (`model_artifacts/location_model/`)**:
+   - LightGBM LambdaMART Ranker.
+   - Top-1 Accuracy: **47.6%** | MRR: **0.518**.
+   - Nearest-to-Victim Baseline: **48.9%** | MRR: **0.525**.
+   - **Production Decision**: Because the heuristic baseline outperforms the trained ranker, the system defaults to the **Nearest-to-Victim Baseline** in production. The ranker is exposed as an "Experimental Model" toggle for judging transparency.
+
+### Confidence Formula
+Combines predictions from all three models into an actionable gate:
+- **Channel Confidence**: `clip((top_prob - 0.20) / 0.60, 0, 1)`
+- **Time Confidence**: `clip(1 - (window_width / max(p50, 0.1)) / 6.0, 0, 1)`
+- **Location Confidence**: Distance separation `clip(|d2 - d1| / max(d1, 1.0), 0, 1)`
+- **Early-Evidence Penalty**: 50% discount if `n_hops_observed <= 1`.
+- **Actionability Classification**: `HIGH >= 0.60`, `MEDIUM >= 0.35`, `LOW < 0.35`.
+
+### Data Protection Rules
+- `ground_truth` and `labels.jsonl` are strictly partitioned. No API response or frontend component ever accesses or leaks ground truth.
+
+---
+
+## 8. SIH Demonstration Walkthrough (3-5 Minutes)
+
+1. **Overview Dashboard**:
+   - Show the aggregated 2,000 incident cases, ~3.4 average snapshots per case, and 54,914 geocoded ATMs.
+   - Highlight the channel distribution and victim demographic split.
+2. **Launch Live Investigation**:
+   - Open a case (e.g. `CASE #B59CF7BE`, ₹56,786).
+   - Point out **Evidence Step 1 / 3**:
+     - The map shows only the victim origin and first mule account.
+     - Confidence is **LOW (28%)** due to early volume penalty: notice the amber/rose warning: *"Insufficient evidence — treat as broad regional forecast"*.
+3. **Step Through Evidence ("Next Evidence" or "Auto Replay")**:
+   - Advance to Step 2:
+     - New mule node added to chain; terminal account moves.
+     - Cash-out time window contracts from 11.1 hours down to 2.6 hours.
+     - Primary channel probability sharpens.
+   - Advance to Step 3 (Final Layer):
+     - Terminal readiness peaks at 96% ("CURRENT MONEY LOCATION" badge glows).
+     - Expected window tightens to 29 min – 2.9 hr (Median 58 min).
+     - Confidence upgrades as evidence volume matures.
+4. **Interactive Map**:
+   - Inspect the numbered candidate ATMs (#1, #2, #3) with distance to victim and terminal branch.
+   - Trace the purple dashed mule routing chain from Victim &rarr; Mule 1 &rarr; Mule 2 &rarr; Mule 3.
+5. **Model Transparency**:
+   - Navigate to **Model Status**:
+   - Highlight the honesty regarding the location model: explain why the system uses the nearest-to-victim baseline in production while keeping the ML ranker experimental.
+
+---
+
+## 9. Directory Structure
+
+```
+SIH-2026/
+├── backend/
+│   ├── config.py                 # Paths, CORS, and settings
+│   ├── schemas.py                # Pydantic request/response schemas
+│   ├── models_loader.py          # Singleton LightGBM model loader
+│   ├── data_service.py           # In-memory cases and ATM data store
+│   ├── prediction_service.py     # Inference pipeline, confidence, & signals
+│   ├── routes/
+│   │   ├── cases.py              # Case & snapshot endpoints
+│   │   ├── predictions.py        # Core /api/predict endpoint
+│   │   ├── atms.py               # ATM database endpoints
+│   │   └── models.py             # Model metrics & diagnostics
+│   ├── main.py                   # FastAPI app entry point
+│   └── requirements.txt          # Backend dependencies
+│
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── Navbar.tsx
+│   │   │   ├── InvestigationHeader.tsx
+│   │   │   ├── InvestigationMap.tsx
+│   │   │   ├── ChannelPanel.tsx
+│   │   │   ├── TimeWindowPanel.tsx
+│   │   │   ├── ConfidencePanel.tsx
+│   │   │   ├── ReplayControls.tsx
+│   │   │   ├── MuleChain.tsx
+│   │   │   ├── SupportingSignals.tsx
+│   │   │   └── CandidateAtmTable.tsx
+│   │   ├── pages/
+│   │   │   ├── Overview.tsx
+│   │   │   ├── CaseList.tsx
+│   │   │   ├── Investigation.tsx
+│   │   │   ├── ATMIntelligence.tsx
+│   │   │   ├── PredictionAnalytics.tsx
+│   │   │   └── ModelStatus.tsx
+│   │   ├── services/api.ts
+│   │   ├── types/index.ts
+│   │   ├── utils/formatters.ts
+│   │   ├── App.tsx
+│   │   └── main.tsx
+│   ├── vite.config.ts
+│   └── package.json
+│
+├── data/                         # Committed datasets (cases, ATMs, snapshots)
+├── data_pipeline/                # Feature extraction & generators
+├── model_artifacts/              # Trained LightGBM model files & reports
+├── demo_app.py                   # Reference CLI prediction application
+├── run_app.py                    # Unified application launcher
+├── start.ps1                     # PowerShell launcher script
+└── tests/
+    └── test_api.py               # Automated pytest suite
+```
