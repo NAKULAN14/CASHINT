@@ -30,15 +30,12 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, isBacke
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <span className="font-bold tracking-wider text-sm sm:text-base text-slate-100 uppercase">
-                  Predictive Cash-Out Intelligence
-                </span>
-                <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-medium tracking-wide bg-cyan-950/80 text-cyan-400 border border-cyan-700/50">
-                  SIH 2026
+                <span className="font-bold tracking-wider text-base sm:text-lg text-slate-100 uppercase font-mono">
+                  CASHINT
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400 tracking-wide font-normal hidden sm:block">
-                Incremental Intelligence for Proactive Cybercrime Intervention
+              <p className="text-[11px] text-cyan-400 font-mono tracking-wide font-normal hidden sm:block">
+                (Case-Adaptive Predictive Cash-out Intelligence)
               </p>
             </div>
           </div>
@@ -107,10 +104,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, isBacke
                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
                 }`}
               >
-                <MapPin className="h-3.5 w-3.5" />
-                <span>ATM Explorer</span>
-              </button>
-            </div>
+                
 
             {/* System Group */}
             <div className="flex items-center space-x-1 bg-slate-900/60 p-1 rounded-lg border border-slate-800">

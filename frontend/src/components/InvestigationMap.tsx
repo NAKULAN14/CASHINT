@@ -76,8 +76,8 @@ const MapBoundsUpdater: React.FC<{ coords: [number, number][] }> = ({ coords }) 
     try {
       const bounds = L.latLngBounds(coords);
       map.fitBounds(bounds, { padding: [50, 50], maxZoom: 13, animate: true, duration: 0.8 });
-    } catch (e) {
-      console.warn('Could not fit map bounds:', e);
+    } catch {
+      // Ignore transient bounds calculation errors
     }
   }, [coords, map]);
 

@@ -1,6 +1,7 @@
 # PowerShell script to start the application
 Write-Host "==========================================================" -ForegroundColor Cyan
-Write-Host " PREDICTIVE CASH-OUT INTELLIGENCE - STARTUP SCRIPT " -ForegroundColor Cyan
+Write-Host " CASHINT - STARTUP SCRIPT " -ForegroundColor Cyan
+Write-Host " (Case-Adaptive Predictive Cash-out Intelligence) " -ForegroundColor Cyan
 Write-Host "==========================================================" -ForegroundColor Cyan
 
 $root = $PSScriptRoot

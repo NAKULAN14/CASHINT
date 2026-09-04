@@ -25,8 +25,7 @@ export function App() {
         if (cases.length > 0) {
           setSelectedCaseId(cases[0].case_id);
         }
-      } catch (e) {
-        console.warn('Backend health check failed:', e);
+      } catch {
         setIsBackendHealthy(false);
       }
     }
@@ -96,18 +95,17 @@ export function App() {
         <div className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2">
           <div className="flex items-center space-x-2">
             <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
-            <span className="text-slate-400">Predictive Cash-Out Intelligence Platform</span>
-            <span>•</span>
-            <span>Smart India Hackathon (SIH 2026)</span>
+            <span className="text-slate-300 font-bold">CASHINT</span>
+            <span className="text-cyan-400 font-normal">(Case-Adaptive Predictive Cash-out Intelligence)</span>
           </div>
 
           <div className="flex items-center space-x-4 text-[11px]">
             <span className="flex items-center space-x-1 text-slate-400">
               <Terminal className="h-3 w-3 text-cyan-400" />
-              <span>FastAPI + React 18 + LightGBM</span>
+              <span>Enterprise Intelligence Engine</span>
             </span>
             <span className="text-slate-600">|</span>
-            <span className="text-emerald-400 font-semibold">Zero Hardcoded Mock Data</span>
+            <span className="text-emerald-400 font-semibold">Deployable Production System</span>
           </div>
         </div>
       </footer>

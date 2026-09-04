@@ -1,4 +1,4 @@
-# Project Context — Predictive Cash-Out Intelligence
+# Project Context — CASHINT (Case-Adaptive Predictive Cash-out Intelligence)
 # For: Agent building the frontend and backend
 
 ---
@@ -50,7 +50,7 @@ when to act vs. wait for more evidence.
 ## 2. Repository layout
 
 ```
-SIH/
+CASHINT/
 ├── data_pipeline/
 │   ├── mule_chain_generator.py        # generates synthetic cases (cases.jsonl)
 │   ├── prepare_atm_dataset.py         # geocodes RBI ATM export → atm_locations.csv

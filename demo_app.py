@@ -24,6 +24,9 @@ Usage:
      python demo_app.py --cases data/cases.jsonl --channel_model_dir model_artifacts/channel_model --time_model_dir model_artifacts/time_model --atm_csv data/atm_locations.csv --location_mode model --location_model_dir model_artifacts/location_model --interactive
 """
 
+import warnings
+warnings.filterwarnings("ignore")
+
 import argparse
 import json
 import math
