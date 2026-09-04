@@ -1,14 +1,14 @@
 import React from 'react';
-import { 
-  ShieldAlert, 
-  Activity, 
-  FolderKanban, 
-  Radar, 
-  BarChart3, 
-  MapPin, 
-  Cpu, 
-  CheckCircle2, 
-  AlertCircle 
+import {
+  ShieldAlert,
+  Activity,
+  FolderKanban,
+  Radar,
+  BarChart3,
+  MapPin,
+  Cpu,
+  CheckCircle2,
+  AlertCircle
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -22,7 +22,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, isBacke
     <header className="border-b border-slate-800/80 bg-[#0c121e]/95 backdrop-blur sticky top-0 z-50">
       <div className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          
+
           {/* Logo & Product Title */}
           <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setActiveTab('overview')}>
             <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-indigo-500/20 to-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.15)]">
@@ -42,16 +42,15 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, isBacke
 
           {/* Navigation Groups */}
           <nav className="hidden md:flex items-center space-x-1 lg:space-x-2 text-xs font-medium">
-            
+
             {/* Intelligence Group */}
             <div className="flex items-center space-x-1 bg-slate-900/60 p-1 rounded-lg border border-slate-800">
               <button
                 onClick={() => setActiveTab('overview')}
-                className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-md transition-all ${
-                  activeTab === 'overview'
-                    ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
-                }`}
+                className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-md transition-all ${activeTab === 'overview'
+                  ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+                  }`}
               >
                 <Activity className="h-3.5 w-3.5" />
                 <span>Overview</span>
@@ -59,11 +58,10 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, isBacke
 
               <button
                 onClick={() => setActiveTab('cases')}
-                className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-md transition-all ${
-                  activeTab === 'cases'
-                    ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
-                }`}
+                className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-md transition-all ${activeTab === 'cases'
+                  ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+                  }`}
               >
                 <FolderKanban className="h-3.5 w-3.5" />
                 <span>Cases</span>
@@ -71,11 +69,10 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, isBacke
 
               <button
                 onClick={() => setActiveTab('investigation')}
-                className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-md transition-all ${
-                  activeTab === 'investigation'
-                    ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
-                }`}
+                className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-md transition-all ${activeTab === 'investigation'
+                  ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+                  }`}
               >
                 <Radar className="h-3.5 w-3.5" />
                 <span>Live Investigation</span>
@@ -86,35 +83,24 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, isBacke
             <div className="flex items-center space-x-1 bg-slate-900/60 p-1 rounded-lg border border-slate-800">
               <button
                 onClick={() => setActiveTab('analytics')}
-                className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-md transition-all ${
-                  activeTab === 'analytics'
+                className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-md transition-all ${activeTab === 'analytics'
                     ? 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/30 shadow-sm'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
-                }`}
+                  }`}
               >
                 <BarChart3 className="h-3.5 w-3.5" />
                 <span>Analytics</span>
               </button>
-
-              <button
-                onClick={() => setActiveTab('atms')}
-                className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-md transition-all ${
-                  activeTab === 'atms'
-                    ? 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/30 shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
-                }`}
-              >
-                
+            </div>
 
             {/* System Group */}
             <div className="flex items-center space-x-1 bg-slate-900/60 p-1 rounded-lg border border-slate-800">
               <button
                 onClick={() => setActiveTab('models')}
-                className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-md transition-all ${
-                  activeTab === 'models'
+                className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-md transition-all ${activeTab === 'models'
                     ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30 shadow-sm'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
-                }`}
+                  }`}
               >
                 <Cpu className="h-3.5 w-3.5" />
                 <span>Model Status</span>
