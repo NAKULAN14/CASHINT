@@ -295,8 +295,13 @@ def main():
 
     with open(args.cases) as f:
         cases = [json.loads(line) for line in f]
-    case = next((c for c in cases if c["case_id"] == args.case_id), cases[0]) if args.case_id else cases[0]
-
+    if args.case_id:
+        # Support full UUID or short prefix (e.g. "82444dcb" matches "82444dcb-d2fd-...")
+        case = next((c for c in cases if c["case_id"].startswith(args.case_id)), None)
+        if case is None:
+            raise ValueError(f"No case found with ID (or prefix) '{args.case_id}'")
+    else:
+        case = cases[0]
     atm_locations = pd.read_csv(args.atm_csv).to_dict("records")
 
     channel_stuff = load_channel_model(args.channel_model_dir)
