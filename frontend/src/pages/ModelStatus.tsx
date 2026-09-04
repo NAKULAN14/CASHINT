@@ -76,16 +76,16 @@ export const ModelStatus: React.FC = () => {
         </p>
       </div>
 
-      {/* Critical Evaluation Transparency Banner (SIH Judges Notice) */}
+      {/* Critical Evaluation Transparency Banner */}
       <div className="bg-amber-950/30 border border-amber-500/60 rounded-xl p-5 shadow-lg relative overflow-hidden">
         <div className="flex items-start space-x-3">
           <AlertTriangle className="h-6 w-6 text-amber-400 shrink-0 mt-0.5" />
           <div className="space-y-1">
             <h3 className="text-sm font-bold font-mono text-amber-300 uppercase tracking-wider">
-              SIH Judging Disclosure: Location Baseline Superiority
+              System Evaluation Disclosure: Location Baseline Superiority
             </h3>
             <p className="text-xs text-slate-300 leading-relaxed">
-              The trained LightGBM LambdaMART location ranker achieves <strong>47.6% Top-1 accuracy</strong>, which is currently slightly below the <strong>48.9% Top-1 accuracy</strong> of the nearest-to-victim geographic heuristic baseline. In accordance with strict engineering integrity, our production system defaults to the <strong>Nearest-to-Victim Baseline</strong>, while exposing the experimental model for audit and continuous tuning.
+              The trained machine learning location ranker achieves <strong>47.6% Top-1 accuracy</strong>, which is currently slightly below the <strong>48.9% Top-1 accuracy</strong> of the nearest-to-victim geographic heuristic baseline. In accordance with strict engineering integrity, our production system defaults to the <strong>Nearest-to-Victim Baseline</strong>, while exposing the experimental model for audit and continuous tuning.
             </p>
           </div>
         </div>
@@ -112,7 +112,7 @@ export const ModelStatus: React.FC = () => {
             <div className="space-y-3 font-mono text-xs">
               <div>
                 <div className="text-[10px] uppercase text-slate-400">Architecture</div>
-                <div className="text-sm font-bold text-white">LightGBM Multiclass Classifier</div>
+                <div className="text-sm font-bold text-white">Multiclass Pattern Classifier</div>
               </div>
 
               <div className="grid grid-cols-2 gap-2 bg-[#12192b] p-3 rounded-lg border border-slate-800">
@@ -166,7 +166,7 @@ export const ModelStatus: React.FC = () => {
             <div className="space-y-3 font-mono text-xs">
               <div>
                 <div className="text-[10px] uppercase text-slate-400">Architecture</div>
-                <div className="text-sm font-bold text-white">3x LightGBM Quantile Regressors</div>
+                <div className="text-sm font-bold text-white">Quantile Temporal Regressors</div>
               </div>
 
               <div className="grid grid-cols-2 gap-2 bg-[#12192b] p-3 rounded-lg border border-slate-800">
@@ -220,7 +220,7 @@ export const ModelStatus: React.FC = () => {
             <div className="space-y-3 font-mono text-xs">
               <div>
                 <div className="text-[10px] uppercase text-slate-400">Architecture</div>
-                <div className="text-sm font-bold text-white">LightGBM LambdaMART Ranker</div>
+                <div className="text-sm font-bold text-white">Spatial Ranking Engine</div>
               </div>
 
               <div className="grid grid-cols-2 gap-2 bg-[#12192b] p-3 rounded-lg border border-slate-800">
@@ -267,7 +267,7 @@ export const ModelStatus: React.FC = () => {
               Time Model Feature Importance (Information Gain)
             </h3>
           </div>
-          <span className="text-[11px] font-mono text-slate-400">LightGBM Gain Metric</span>
+          <span className="text-[11px] font-mono text-slate-400">Feature Gain Metric</span>
         </div>
 
         <div className="h-64 w-full">

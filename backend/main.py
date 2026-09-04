@@ -1,3 +1,6 @@
+import warnings
+warnings.filterwarnings("ignore")
+
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -13,17 +16,17 @@ from backend.schemas import HealthResponse
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup: load models and dataset once
-    print("--- Starting Predictive Cash-Out Intelligence Backend ---")
+    print("--- Starting CASHINT Backend ---")
     get_models()
     get_data_service()
-    print("--- Backend Ready to Serve Requests ---")
+    print("--- CASHINT Backend Ready to Serve Requests ---")
     yield
     print("--- Shutting down backend ---")
 
 
 app = FastAPI(
-    title="Predictive Cash-Out Intelligence API",
-    description="Incremental Intelligence for Proactive Cybercrime Intervention",
+    title="CASHINT API",
+    description="Case-Adaptive Predictive Cash-out Intelligence",
     version="1.0.0",
     lifespan=lifespan,
 )

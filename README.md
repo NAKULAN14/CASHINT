@@ -1,7 +1,7 @@
-# Predictive Cash-Out Intelligence
+# CASHINT
 
-> **Incremental Intelligence for Proactive Cybercrime Intervention**  
-> *A decision-support intelligence platform developed for Smart India Hackathon (SIH).*
+> **(Case-Adaptive Predictive Cash-out Intelligence)**  
+> *A decision-support intelligence platform for proactive cybercrime intervention.*
 
 ---
 
@@ -9,7 +9,7 @@
 
 When a cyber financial fraud occurs, criminals route illicit funds through multi-layered mule account chains to obfuscate the money trail before physically withdrawing (**"cashing out"**) the money via ATMs, banking branches, local cash agents, or peer-to-peer UPI channels. Law enforcement investigators operate against a narrow time window to identify the withdrawal vector and freeze or interdict the funds.
 
-**Predictive Cash-Out Intelligence** transforms static post-facto fraud tracking into an active decision-support system. Rather than generating a one-time risk score, the system implements **incremental prediction**:
+**CASHINT (Case-Adaptive Predictive Cash-out Intelligence)** transforms static post-facto fraud tracking into an active decision-support system. Rather than generating a one-time risk score, the system implements **incremental prediction**:
 > *"As new transaction hops and mule accounts are uncovered, Where, When, How, and Confidence continuously evolve."*
 
 ---
@@ -179,7 +179,7 @@ Combines predictions from all three models into an actionable gate:
 
 ---
 
-## 8. SIH Demonstration Walkthrough (3-5 Minutes)
+## 8. System Demonstration Walkthrough (3-5 Minutes)
 
 1. **Overview Dashboard**:
    - Show the aggregated 2,000 incident cases, ~3.4 average snapshots per case, and 54,914 geocoded ATMs.
@@ -210,7 +210,7 @@ Combines predictions from all three models into an actionable gate:
 ## 9. Directory Structure
 
 ```
-SIH-2026/
+CASHINT/
 ├── backend/
 │   ├── config.py                 # Paths, CORS, and settings
 │   ├── schemas.py                # Pydantic request/response schemas

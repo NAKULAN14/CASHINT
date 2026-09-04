@@ -88,8 +88,11 @@ export const Overview: React.FC<OverviewProps> = ({ onSelectCase }) => {
             <span>Cyber Intelligence Operations Center</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white uppercase font-mono">
-            Predictive Cash-Out Intelligence
+            CASHINT
           </h1>
+          <p className="text-xs sm:text-sm text-cyan-400 font-mono font-semibold mt-1 mb-2">
+            (Case-Adaptive Predictive Cash-out Intelligence)
+          </p>
           <p className="text-sm text-slate-300 mt-1 leading-relaxed">
             "Proactive intelligence for time-critical cybercrime intervention." Continuously ingests evolving mule-chain transactions and predicts <span className="text-cyan-300 font-semibold">Where</span>, <span className="text-amber-300 font-semibold">When</span>, and <span className="text-indigo-300 font-semibold">How</span> criminals will physically liquidate stolen funds before cash-out occurs.
           </p>
